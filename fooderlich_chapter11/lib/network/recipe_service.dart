@@ -33,10 +33,13 @@ class RecipeService {
   // which data type it will return or when it will finish. "async" signals that
   // this method runs asynchronously.
   Future<dynamic> getRecipes(String query, int from, int to) async {
-    // 2
+    // 2 Use "final" to create a non-changing variable. You use "await" to tell
+    // the app to wait until "getData" returns its result. Look closely at
+    // "getData()" and note that you're creating the API URL with the variables
+    // passed in (plus the IDs previously created in the Edamam dashboard).
     final recipeData = await getData(
         '$apiUrl?app_id=$apiId&app_key=$apiKey&q=$query&from=$from&to=$to');
-    // 3
+    // 3 "return" the data retrieved from the API.
     return recipeData;
   }
 }
