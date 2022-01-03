@@ -24,10 +24,53 @@ class ModelConverter implements Converter {
     return encodeJson(req);
   }
 
-  Request encodeJson(Request request) {}
+  Request encodeJson(Request request) {
+    // 1 Extract the content type from the request headers.
+    final contentType = request.headers[contentTypeKey];
+    // 2 Confirm "contentType" is one type "application/json".
+    if (contentType != null && contentType.contains(jsonHeaders)) {
+      // 3 Make a copy of the request with a JSON-eoncoded body.
+      return request.copyWith(body: json.encode(request.body));
+    }
+    return request;
+  }
 
-  Response decodeJson<BodyType, InnerType>(Response response) {}
+  Response<BodyType> decodeJson<BodyType, InnerType>(Response response) {
+    final contentType = response.headers[contentTypeKey];
+    var body = response.body;
+    // 1 Check that you're dealing with JSON and decode the "response" into a
+    // string named "body".
+    if (contentType != null && contentType.contains(jsonHeaders)) {
+      body = utf8.decode(response.bodyBytes);
+    }
+    try {
+      // 2 Use JSON decoding to convert that string into a map representation.
+      final mapData = json.decode(body);
+      // 3 When there's an error, the server returns a field named "status".
+      // Here, you check to see if the map contains such a field. If so, you
+      // return a response that embeds an instance of "Error".
+      if (mapData['status'] != null) {
+        return response.copyWith<BodyType>(
+            body: Error(Exception(mapData['status'])) as BodyType);
+      }
+      // 4 Use "APIRecipeQuery.fromJson()" to convert the map into the model
+      // class.
+      final recipeQuery = APIRecipeQuery.fromJson(mapData);
+      // 5 Return a successful response that wraps "recipeQuery".
+      return response.copyWith<BodyType>(
+          body: Success(recipeQuery) as BodyType);
+    } catch (e) {
+      // 6 If you get any other kind of error, wrap the response with a generic
+      // instance of "Error".
+      chopperLogger.warning(e);
+      return response.copyWith<BodyType>(
+          body: Error(e as Exception) as BodyType);
+    }
+  }
 
   @override
-  Response<BodyType> convertResponse<BodyType, InnerType>(Response response) {}
+  Response<BodyType> convertResponse<BodyType, InnerType>(Response response) {
+    // 1 This simply calls "decodeJson", which you defined earlier.
+    return decodeJson<BodyType, InnerType>(response);
+  }
 }
