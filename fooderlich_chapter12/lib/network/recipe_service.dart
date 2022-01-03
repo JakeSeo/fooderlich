@@ -36,6 +36,38 @@ abstract class RecipeService extends ChopperService {
       @Query('q') String query,
       @Query('from') int from,
       @Query('to') int to);
-  // TODO: Add create()
+  static RecipeService create() {
+    // 1 Create a "ChopperClient" instance.
+    final client = ChopperClient(
+      // 2 Pass in a base URL using the "apiUrl" constant.
+      baseUrl: apiUrl,
+      // 3 Pass in two interceptors. "_addQuery()" adds your key and ID to the
+      // query. "HttpLoggingInterceptor" is part of Chopper and logs all calls.
+      // It's handy while you're developing to see traffic between the app and
+      // the server.
+      interceptors: [_addQuery, HttpLoggingInterceptor()],
+      // 4 Set the "converter" as an instance of "ModelConverter".
+      converter: ModelConverter(),
+      // 5 Use the built-in "JsonConverter" to decode any errors.
+      errorConverter: const JsonConverter(),
+      // 6 Define the services created when you run the generator script.
+      services: [
+        _$RecipeService(),
+      ],
+    );
+    // 7 Return an instance of the generated service.
+    return _$RecipeService(client);
+  }
 }
-// TODO: Add _addQuery()
+
+Request _addQuery(Request req) {
+  // 1 Creates a "Map", which contains key-value pairs from the existing
+  // "Request" parameters.
+  final params = Map<String, dynamic>.from(req.parameters);
+  // 2 Adds the "app_id" and the "app_key" parameters to the map.
+  params['app_id'] = apiId;
+  params['app_key'] = apiKey;
+  // 3 Returns a new copy of the "Request" with the parameters contained in the
+  // map.
+  return req.copyWith(parameters: params);
+}
