@@ -3,6 +3,7 @@ import 'package:chopper/chopper.dart';
 import 'recipe_model.dart';
 import 'model_response.dart';
 import 'model_converter.dart';
+part 'recipe_service.chopper.dart';
 
 // 2 Here is where you re-enter your API Key and ID.
 const String apiKey = '5ef5d522d7ae9aca8e09b1d177945486';
