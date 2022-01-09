@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../data/models/models.dart';
 
 part 'recipe_model.g.dart';
 
@@ -97,4 +98,14 @@ class APIIngredients {
   Map<String, dynamic> toJson() => _$APIIngredientsToJson(this);
 }
 
-// TODO: Add convertIngredients() here
+List<Ingredient> convertIngredients(List<APIIngredients> apiIngredients) {
+  // 1 Create a new list of ingredients to return.
+  final ingredients = <Ingredient>[];
+  // 2 Convert each "APIIngredients" into an instance of "Ingredient" and add
+  // it to the list.
+  apiIngredients.forEach((ingredient) {
+    ingredients
+        .add(Ingredient(name: ingredient.name, weight: ingredient.weight));
+  });
+  return ingredients;
+}
