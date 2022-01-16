@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'mock_service/mock_service.dart';
 
 import 'ui/main_screen.dart';
 import 'package:provider/provider.dart';
@@ -22,18 +23,26 @@ void _setupLogging() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // 1 Use the "ChangeNotifierProvider" that has the type "MemoryRepository".
-    return ChangeNotifierProvider<MemoryRepository>(
-      // 2 Set "lazy" to false, which creates the repository right away instead
-      // of waiting until you need it. This is useful when the repository has to
-      // do some background work to start up.
-      lazy: false,
-      // 3 Create your repository.
-      create: (_) => MemoryRepository(),
-      // 4 Return "MaterialApp" as the child widget.
+    return MultiProvider(
+      // 1 "MultiProvider" uses the "providers" property to define multiple
+      // providers.
+      providers: [
+        // 2 The first provider is your existing "ChangeNotifierProvider".
+        ChangeNotifierProvider<MemoryRepository>(
+          lazy: false,
+          create: (_) => MemoryRepository(),
+        ),
+        // 3 You add a new provider, which will use the new mock service.
+        Provider(
+          // 4 Create the "MockService" and call "create()" to load the JSON
+          // files (notice the ..cascade operator).
+          create: (_) => MockService()..create(),
+          lazy: false,
+        ),
+      ],
+      // 5 The only child is a "MaterialApp", like before.
       child: MaterialApp(
         title: 'Recipes',
         debugShowCheckedModeBanner: false,
